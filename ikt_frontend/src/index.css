@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.bg-navbar{
+    background: #063838;
+  }
+.color-pink{
+    color: #ffffff;
+}
+.bg-footer{
+  background: #cbcaca;
+}
+.color-green{
+  color: #063838;
+}
+.bg-dark-blue{
+  background: #11011f;
+}
