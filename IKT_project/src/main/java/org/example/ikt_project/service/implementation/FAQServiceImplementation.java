@@ -1,0 +1,122 @@
+package org.example.ikt_project.service.implementation;
+
+import org.example.ikt_project.model.FAQ;
+import org.example.ikt_project.repository.FAQRepository;
+import org.example.ikt_project.service.FAQService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.Collections;
+import java.util.List;
+
+@Service
+public class FAQServiceImplementation implements FAQService {
+    @Autowired
+    private FAQRepository faqRepository;
+    private final WebClient webClient;
+
+    public FAQServiceImplementation() {
+        this.webClient = WebClient.builder()
+                .baseUrl(API_URL)
+                .build();
+    }
+    @Value("${gemini.api.key}")
+    private String apiKey;
+
+    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+
+    @Override
+    public String getAnswer(String userQuestion) {
+        List<FAQ> faqs = faqRepository.findAll();
+        for (FAQ faq : faqs) {
+            if (isSimilar(faq.getQuestion(), userQuestion)) {
+                return faq.getAnswer();
+            }
+        }
+       // return askGemini(userQuestion);
+        return "Извинете, моментално немам одговор на вашето прашање.";
+    }
+
+    @Override
+    public boolean isSimilar(String dbQuestion, String userQuestion) {
+        if (dbQuestion == null || userQuestion == null) return false;
+        dbQuestion = dbQuestion.trim().toLowerCase();
+        userQuestion = userQuestion.trim().toLowerCase();
+        return userQuestion.contains(dbQuestion) || dbQuestion.contains(userQuestion);
+    }
+
+    @Override
+    public List<FAQ> getRandomFAQs() {
+        List<FAQ> allFaqs = faqRepository.findAll();
+        Collections.shuffle(allFaqs);
+        return allFaqs.stream()
+                .limit(5)
+                .toList();
+    }
+
+    //gemini finds the answer from browser
+    /* private String askGemini(String question) {
+        Map<String, Object> body = Map.of(
+            "contents", List.of(
+                Map.of(
+                    "parts", List.of(
+                        Map.of("text", question)
+                    )
+                )
+            )
+        );
+
+        Mono<Map> response = webClient.post()
+            .uri("?key=" + apiKey)
+            .bodyValue(body)
+            .retrieve()
+            .bodyToMono(Map.class);
+
+        Map responseMap = response.block();
+        if (responseMap != null && responseMap.containsKey("candidates")) {
+            List candidates = (List) responseMap.get("candidates");
+            if (!candidates.isEmpty()) {
+                Map candidate = (Map) candidates.get(0);
+                Map content = (Map) candidate.get("content");
+                List parts = (List) content.get("parts");
+                if (!parts.isEmpty()) {
+                    Map part = (Map) parts.get(0);
+                    return (String) part.get("text");
+                }
+            }
+        }
+        return "Извинете, моментално немам одговор на вашето прашање.";
+    }
+*/
+
+
+
+    // gemini finds the answer
+    /*private String askGeminiWithDatabaseContext(String userQuestion) {
+    List<FAQ> faqs = faqRepository.findAll();
+
+    StringBuilder contextBuilder = new StringBuilder();
+    contextBuilder.append("Here are some FAQs from the database:\n");
+    int count = 0;
+    for (FAQ faq : faqs) {
+        if (count >= 5) break;
+        contextBuilder.append((count + 1))
+            .append(". ")
+            .append(faq.getName())
+            .append(" - Answer: ")
+            .append(faq.getContent())
+            .append("\n");
+        count++;
+    }
+
+    contextBuilder.append("\nBased on these FAQs, answer this question: ")
+                  .append(userQuestion);
+
+    String finalPrompt = contextBuilder.toString();
+
+    // Then send `finalPrompt` to Gemini instead of just `userQuestion`
+    return askGemini(finalPrompt);
+}*/
+}

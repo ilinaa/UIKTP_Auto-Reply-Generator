@@ -1,0 +1,12 @@
+package org.example.ikt_project.service;
+
+import org.example.ikt_project.model.FAQ;
+
+import java.util.List;
+
+public interface FAQService {
+    String getAnswer(String userQuestion);
+    boolean isSimilar(String dbQuestion, String userQuestion);
+    //String askGemini(String question);
+    List<FAQ> getRandomFAQs();
+}
