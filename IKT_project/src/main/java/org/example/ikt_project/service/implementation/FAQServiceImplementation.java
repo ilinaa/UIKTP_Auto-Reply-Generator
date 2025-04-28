@@ -28,7 +28,8 @@ public class FAQServiceImplementation implements FAQService {
     @Value("${gemini.api.key}")
     private String apiKey;
 
-    //    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+    // private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+    // I couldn't use the old API_URL so I created mine, I think it can be changed to the old one
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
     @Override
