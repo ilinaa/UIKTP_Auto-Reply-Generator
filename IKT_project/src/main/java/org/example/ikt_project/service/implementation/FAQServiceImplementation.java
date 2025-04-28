@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class FAQServiceImplementation implements FAQService {
@@ -22,21 +24,18 @@ public class FAQServiceImplementation implements FAQService {
                 .baseUrl(API_URL)
                 .build();
     }
+
     @Value("${gemini.api.key}")
     private String apiKey;
 
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+    //    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
     @Override
     public String getAnswer(String userQuestion) {
-        List<FAQ> faqs = faqRepository.findAll();
-        for (FAQ faq : faqs) {
-            if (isSimilar(faq.getQuestion(), userQuestion)) {
-                return faq.getAnswer();
-            }
-        }
-       // return askGemini(userQuestion);
-        return "Извинете, моментално немам одговор на вашето прашање.";
+        // The question is send together with the questions in the database and then together are send on the API_URL
+        // where the answer is sent back using the FAQ from DB and returned back to the frontend.
+        return askGeminiWithDatabaseContext(userQuestion);
     }
 
     @Override
@@ -57,22 +56,23 @@ public class FAQServiceImplementation implements FAQService {
     }
 
     //gemini finds the answer from browser
-    /* private String askGemini(String question) {
+    @Override
+    public String askGemini(String question) {
         Map<String, Object> body = Map.of(
-            "contents", List.of(
-                Map.of(
-                    "parts", List.of(
-                        Map.of("text", question)
-                    )
+                "contents", List.of(
+                        Map.of(
+                                "parts", List.of(
+                                        Map.of("text", question)
+                                )
+                        )
                 )
-            )
         );
 
         Mono<Map> response = webClient.post()
-            .uri("?key=" + apiKey)
-            .bodyValue(body)
-            .retrieve()
-            .bodyToMono(Map.class);
+                .uri(uriBuilder -> uriBuilder.queryParam("key", apiKey).build())
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Map.class);
 
         Map responseMap = response.block();
         if (responseMap != null && responseMap.containsKey("candidates")) {
@@ -89,34 +89,33 @@ public class FAQServiceImplementation implements FAQService {
         }
         return "Извинете, моментално немам одговор на вашето прашање.";
     }
-*/
-
 
 
     // gemini finds the answer
-    /*private String askGeminiWithDatabaseContext(String userQuestion) {
-    List<FAQ> faqs = faqRepository.findAll();
+    @Override
+    public String askGeminiWithDatabaseContext(String userQuestion) {
+        List<FAQ> faqs = faqRepository.findAll();
 
-    StringBuilder contextBuilder = new StringBuilder();
-    contextBuilder.append("Here are some FAQs from the database:\n");
-    int count = 0;
-    for (FAQ faq : faqs) {
-        if (count >= 5) break;
-        contextBuilder.append((count + 1))
-            .append(". ")
-            .append(faq.getName())
-            .append(" - Answer: ")
-            .append(faq.getContent())
-            .append("\n");
-        count++;
+        StringBuilder contextBuilder = new StringBuilder();
+        contextBuilder.append("Here are some FAQs from the database:\n");
+        int count = 0;
+        for (FAQ faq : faqs) {
+//            if (count >= 5) break;
+            contextBuilder.append((count + 1))
+                    .append(". ")
+                    .append(faq.getQuestion())
+                    .append(" - Answer: ")
+                    .append(faq.getAnswer())
+                    .append("\n");
+            count++;
+        }
+
+        contextBuilder.append("\nBased on these FAQs, answer this question: ")
+                .append(userQuestion);
+
+        String finalPrompt = contextBuilder.toString();
+
+        // Then send `finalPrompt` to Gemini instead of just `userQuestion`
+        return askGemini(finalPrompt);
     }
-
-    contextBuilder.append("\nBased on these FAQs, answer this question: ")
-                  .append(userQuestion);
-
-    String finalPrompt = contextBuilder.toString();
-
-    // Then send `finalPrompt` to Gemini instead of just `userQuestion`
-    return askGemini(finalPrompt);
-}*/
 }
