@@ -2,7 +2,6 @@ package org.example.ikt_project.controller;
 
 import org.example.ikt_project.model.FAQ;
 import org.example.ikt_project.service.FAQService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,7 +14,6 @@ public class FAQController {
 
     private final FAQService faqService;
 
-    @Autowired
     public FAQController(FAQService faqService) {
         this.faqService = faqService;
     }

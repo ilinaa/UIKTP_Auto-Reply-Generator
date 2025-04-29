@@ -3,7 +3,6 @@ package org.example.ikt_project.service.implementation;
 import org.example.ikt_project.model.FAQ;
 import org.example.ikt_project.repository.FAQRepository;
 import org.example.ikt_project.service.FAQService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -15,11 +14,12 @@ import java.util.Map;
 
 @Service
 public class FAQServiceImplementation implements FAQService {
-    @Autowired
-    private FAQRepository faqRepository;
+
+    private final FAQRepository faqRepository;
     private final WebClient webClient;
 
-    public FAQServiceImplementation() {
+    public FAQServiceImplementation(FAQRepository faqRepository) {
+        this.faqRepository = faqRepository;
         this.webClient = WebClient.builder()
                 .baseUrl(API_URL)
                 .build();
@@ -101,7 +101,6 @@ public class FAQServiceImplementation implements FAQService {
         contextBuilder.append("Here are some FAQs from the database:\n");
         int count = 0;
         for (FAQ faq : faqs) {
-//            if (count >= 5) break;
             contextBuilder.append((count + 1))
                     .append(". ")
                     .append(faq.getQuestion())
