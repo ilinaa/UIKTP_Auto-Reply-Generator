@@ -9,4 +9,10 @@ public interface FAQService {
     boolean isSimilar(String dbQuestion, String userQuestion);
     //String askGemini(String question);
     List<FAQ> getRandomFAQs();
+
+    //gemini finds the answer from browser
+    String askGemini(String question);
+
+    // gemini finds the answer
+    String askGeminiWithDatabaseContext(String userQuestion);
 }

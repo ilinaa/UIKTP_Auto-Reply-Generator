@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/faq")
@@ -19,13 +20,13 @@ public class FAQController {
         this.faqService = faqService;
     }
 
-    // ✅ Endpoint: POST /api/faq/ask
+    //Endpoint: POST /api/faq/ask
     @PostMapping("/ask")
-    public String askQuestion(@RequestBody String question) {
-        return faqService.getAnswer(question);
+    public Map<String, String> askQuestion(@RequestBody Map<String, String> request) {
+        return Map.of("answer", faqService.getAnswer(request.get("question")));
     }
 
-    // ✅ Endpoint: GET /api/faq/random
+    //Endpoint: GET /api/faq/random
     @GetMapping("/random")
     public List<FAQ> getRandomFAQs() {
         return faqService.getRandomFAQs();

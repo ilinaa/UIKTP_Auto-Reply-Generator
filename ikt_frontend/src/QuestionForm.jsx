@@ -9,16 +9,17 @@ export default function QuestionForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    // Change if needed (For example if the port is changed)
+    const uri = "http://localhost:8080/api/faq/ask";
     try {
-      const res = await fetch("http://localhost:5000/api/ask", {
+      const res = await fetch(uri, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ question }),
       });
-  
+
       const data = await res.json();
       const answer = data.answer;
 
