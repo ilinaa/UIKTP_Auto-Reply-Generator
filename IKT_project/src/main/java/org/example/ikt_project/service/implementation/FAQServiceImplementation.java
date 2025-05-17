@@ -9,9 +9,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfWriter;
 
 @Service
 public class FAQServiceImplementation implements FAQService {
@@ -118,5 +125,56 @@ public class FAQServiceImplementation implements FAQService {
 
         // Then send `finalPrompt` to Gemini instead of just `userQuestion`
         return askGemini(finalPrompt);
+    }
+
+    @Override
+    public byte[] exportAllQuestionsAndAnswers() {
+        List<FAQ> faqs = faqRepository.findAll();
+        return generatePdf(faqs, "All Questions and Answers");
+    }
+
+    private byte[] generatePdf(List<FAQ> faqs, String title) {
+        try {
+            if (faqs == null || faqs.isEmpty()) {
+                System.err.println("No FAQs found to export");
+                return new byte[0];
+            }
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            Document document = new Document();
+            PdfWriter.getInstance(document, baos);
+            document.open();
+
+            // Load Unicode font from resources
+            String fontResourcePath = getClass().getClassLoader().getResource("fonts/DejaVuSans.ttf").toString();
+            BaseFont baseFont = BaseFont.createFont(fontResourcePath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            Font font = new Font(baseFont, 14);
+
+            // Add title
+            Paragraph titleParagraph = new Paragraph(title, font);
+            titleParagraph.setAlignment(Paragraph.ALIGN_CENTER);
+            document.add(titleParagraph);
+            document.add(new Paragraph("\n", font));
+
+            // Add content
+            for (FAQ faq : faqs) {
+                String question = faq.getQuestion() != null ? faq.getQuestion() : "No question";
+                String answer = faq.getAnswer() != null ? faq.getAnswer() : "Not answered yet";
+
+                Paragraph questionParagraph = new Paragraph("Question: " + question, font);
+                Paragraph answerParagraph = new Paragraph("Answer: " + answer, font);
+
+                document.add(questionParagraph);
+                document.add(answerParagraph);
+                document.add(new Paragraph("\n", font));
+            }
+
+            document.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            System.err.println("Error generating PDF: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to generate PDF: " + e.getMessage());
+        }
     }
 }

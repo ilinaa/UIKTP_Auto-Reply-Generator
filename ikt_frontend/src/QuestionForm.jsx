@@ -104,6 +104,62 @@ export default function QuestionForm() {
     }
   };
 
+  const handleExportAll = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/faq/export/all", {
+        method: "GET",
+      });
+      
+      if (res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/pdf")) {
+          const blob = await res.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "all_questions_answers.pdf";
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else {
+          const errorText = await res.text();
+          alert(errorText || "Се случи грешка при експортирање.");
+        }
+      } else {
+        const errorText = await res.text();
+        alert(errorText || "Се случи грешка при експортирање.");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Се случи грешка при експортирање. Проверете дали серверот работи.");
+    }
+  };
+
+  const handleExportUnanswered = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/export/unanswered", {
+        method: "GET",
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "unanswered_questions.pdf";
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        alert("Се случи грешка при експортирање.");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Се случи грешка при експортирање.");
+    }
+  };
+
   return (
     <div className="w-full bg-dark-blue  min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl w-full bg-white p-8 rounded-lg shadow-lg">
@@ -189,6 +245,16 @@ export default function QuestionForm() {
           </button>
           {importMessage && <div className="mt-4 text-green-600">{importMessage}</div>}
           {importError && <div className="mt-4 text-red-600">{importError}</div>}
+        </div>
+        {/* Export section */}
+        <div className="mt-8 flex flex-col items-center">
+          <button
+            type="button"
+            onClick={handleExportAll}
+            className="py-2 px-6 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            Експортирај ги сите прашања и одговори
+          </button>
         </div>
       </div>
     </div>

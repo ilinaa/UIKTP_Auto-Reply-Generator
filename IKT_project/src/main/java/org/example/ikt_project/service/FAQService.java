@@ -15,4 +15,10 @@ public interface FAQService {
 
     // gemini finds the answer
     String askGeminiWithDatabaseContext(String userQuestion);
+
+    // Export all questions and answers as PDF
+    byte[] exportAllQuestionsAndAnswers();
+
+    // Export unanswered questions as PDF
+    // byte[] exportUnansweredQuestions();
 }
