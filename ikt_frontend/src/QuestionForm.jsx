@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import emailjs from '@emailjs/browser';
+import faqService from "./service/faqService.js";
 
 export default function QuestionForm() {
   const [name, setName] = useState('');
@@ -11,18 +12,10 @@ export default function QuestionForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Change if needed (For example if the port is changed)
-    const uri = "http://localhost:8080/api/faq/ask";
-    try {
-      const res = await fetch(uri, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ question }),
-      });
 
-      const data = await res.json();
+    try {
+      const res = await faqService.getAnswer(JSON.stringify({ question }))
+      const data = res.data;
       const answer = data.answer;
 
       const templateParams = {
@@ -32,14 +25,14 @@ export default function QuestionForm() {
         user_question: question,
         system_answer: answer,
       };
-  
+      console.log(templateParams)
       await emailjs.send(
-        "service_gcpzccr",    
-        "template_pbp440i",   
+        "service_gcpzccr",
+        "template_pbp440i",
         templateParams,
-        "8WEC8xLMkHjte5iR3"  
+        "8WEC8xLMkHjte5iR3"
       );
-  
+
       alert("Прашњето беше испратено и одговорено преку е-пошта!");
     } catch (err) {
       console.error("Error:", err);
@@ -48,7 +41,7 @@ export default function QuestionForm() {
   };
 
   const handleImport = async (e) => {
-   
+
     setImportMessage("");
     setImportError("");
     if (!e.target.files.length) return;
@@ -109,7 +102,7 @@ export default function QuestionForm() {
       const res = await fetch("http://localhost:8080/api/faq/export/all", {
         method: "GET",
       });
-      
+
       if (res.ok) {
         const contentType = res.headers.get("content-type");
         if (contentType && contentType.includes("application/pdf")) {
