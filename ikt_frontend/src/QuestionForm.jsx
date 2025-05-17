@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import emailjs from '@emailjs/browser';
 import faqService from "./service/faqService.js";
+import importService from "./service/importService.js";
 
 export default function QuestionForm() {
   const [name, setName] = useState('');
@@ -25,7 +26,7 @@ export default function QuestionForm() {
         user_question: question,
         system_answer: answer,
       };
-      console.log(templateParams)
+
       await emailjs.send(
         "service_gcpzccr",
         "template_pbp440i",
@@ -49,13 +50,10 @@ export default function QuestionForm() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const res = await fetch("http://localhost:8080/api/import/file", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
+      const res = await importService.importFile(formData)
+      const data = res.data
       let users = [];
-      if (res.ok && data.message) {
+      if (res.status === 200 && data.message) {
         try {
           users = JSON.parse(data.message);
         } catch (e) {
@@ -126,30 +124,6 @@ export default function QuestionForm() {
     } catch (err) {
       console.error("Error:", err);
       alert("Се случи грешка при експортирање. Проверете дали серверот работи.");
-    }
-  };
-
-  const handleExportUnanswered = async () => {
-    try {
-      const res = await fetch("http://localhost:8080/api/export/unanswered", {
-        method: "GET",
-      });
-      if (res.ok) {
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "unanswered_questions.pdf";
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        alert("Се случи грешка при експортирање.");
-      }
-    } catch (err) {
-      console.error("Error:", err);
-      alert("Се случи грешка при експортирање.");
     }
   };
 

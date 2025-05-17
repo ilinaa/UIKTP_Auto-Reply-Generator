@@ -10,9 +10,7 @@ export default function Banner() {
       className="w-full relative bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url(${img1})`, height: '650px' }}
     >
-      
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black opacity-40"></div>
+
 
       {/* Content */}
       <div className="relative z-10 w-full h-full flex flex-col md:flex-row items-center justify-between px-6 md:px-28">

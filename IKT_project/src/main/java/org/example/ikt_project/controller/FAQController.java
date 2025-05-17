@@ -56,13 +56,4 @@ public class FAQController {
         }
     }
 
-    // Endpoint: GET /api/export/unanswered
-    // @GetMapping("/export/unanswered")
-    // public ResponseEntity<byte[]> exportUnansweredQuestions() {
-    //     byte[] pdfBytes = faqService.exportUnansweredQuestions();
-    //     HttpHeaders headers = new HttpHeaders();
-    //     headers.setContentType(MediaType.APPLICATION_PDF);
-    //     headers.setContentDispositionFormData("attachment", "unanswered_questions.pdf");
-    //     return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
-    // }
 }

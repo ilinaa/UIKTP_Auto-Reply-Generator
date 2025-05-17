@@ -57,11 +57,6 @@ export default function(){
             Контакт
           </Link>
         </li>
-        {/* <li>
-          <Link to="/informations" className="block py-2 px-3 rounded-sm text-xl md:hover:text-white">
-            Информации
-          </Link>
-        </li> */}
         <li>
           <Link to="/aboutUs" className="block py-2 px-3 rounded-sm text-xl md:hover:text-white" aria-current="page">
             За нас
